@@ -1,11 +1,14 @@
 from flask import Flask, request, jsonify
 import joblib
 import numpy as np
+import os
 
 app = Flask(__name__)
 
-# تحميل الموديل - تأكد أن الملف في المجلد الرئيسي
-model = joblib.load('best_model.pkl')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+model = joblib.load(os.path.join(BASE_DIR, 'pulsekey_model.pkl'))
+scaler = joblib.load(os.path.join(BASE_DIR, 'pulsekey_scaler.pkl'))
 
 @app.route('/')
 def home():
@@ -15,15 +18,14 @@ def home():
 def predict():
     try:
         data = request.json['data']
-        # تحويل البيانات لمصفوفة NumPy
         input_data = np.array(data).reshape(1, -1)
-        
-        # التنبؤ
-        prediction = model.predict(input_data)
-        
+        scaled_data = scaler.transform(input_data)
+        prediction = model.predict(scaled_data)
         return jsonify({
             'status': 'success',
-            'risk_level_prediction': int(prediction[0])
+            'risk_level': int(prediction[0])
         })
     except Exception as e:
         return jsonify({'error': str(e)})
+
+handler = app
