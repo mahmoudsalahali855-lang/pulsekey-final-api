@@ -1,5 +1,21 @@
 {
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/api/index.py" }
+  "version": 2,
+  "builds": [
+    {
+      "src": "index.py",
+      "use": "@vercel/python",
+      "config": {
+        "includeFiles": [
+          "pulsekey_model.pkl",
+          "pulsekey_scaler.pkl"
+        ]
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "index.py"
+    }
   ]
 }
